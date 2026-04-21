@@ -3,185 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kognitiv Xotira</title>
+    <title>SolarArk Kognitiv Xotira</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #fdfdfd;
-            --text-color: #2c3e50;
-            --primary-color: #27ae60;
-            --cell-bg: #ecf0f1;
-            --cell-active: #27ae60;
-            --cell-hidden: #bdc3c7;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            margin: 0 0 5px 0;
-            font-weight: 600;
-        }
-        p {
-            margin: 0;
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-        #grid {
-            display: grid;
-            gap: 8px;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-        .cell {
-            background-color: var(--cell-bg);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .cell.active {
-            background-color: var(--cell-active);
-        }
-        .cell.error {
-            background-color: #e74c3c;
-        }
-        button {
-            background-color: var(--text-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 24px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: opacity 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        button:active {
-            opacity: 0.8;
-        }
-        #message {
-            margin-top: 15px;
-            font-weight: 500;
-            height: 20px;
-        }
+        /* Avvalgi stillar saqlanadi, faqat muhimlari qoldirildi */
+        :root { --bg-color: #fdfdfd; --text-color: #2c3e50; --primary-color: #27ae60; --cell-bg: #ecf0f1; --cell-active: #27ae60; --cell-hidden: #bdc3c7; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+        #header { text-align: center; margin-bottom: 20px; }
+        h1 { font-size: 24px; margin: 0 0 5px 0; }
+        #grid { display: grid; gap: 8px; margin-bottom: 30px; transition: all 0.3s ease; }
+        .cell { background-color: var(--cell-bg); border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .cell.active { background-color: var(--cell-active); }
+        .cell.error { background-color: #e74c3c; }
+        button { background-color: var(--text-color); color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 24px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
+    <div id="overlay">
+        <h2 id="overlay-title"></h2>
+        <p id="overlay-desc" style="margin-bottom: 20px; color: #7f8c8d;"></p>
+        <button id="overlay-btn"></button>
+    </div>
+
     <div id="header">
         <h1>Daraja: <span id="level-display">1</span></h1>
-        <p>Yashil kataklarni eslab qoling</p>
+        <p>Limit: <span id="limit-display">0</span>/15</p>
     </div>
 
     <div id="grid"></div>
-
     <button id="start-btn" onclick="startLevel()">Boshlash</button>
-    <div id="message"></div>
+    <div id="message" style="margin-top: 15px; font-weight: 500; height: 20px;"></div>
 
     <script>
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
 
+        // Faqat Telegram orqali kirishni talab qilish
+        if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+            document.body.innerHTML = "<h2 style='text-align:center; padding: 20px;'>Faqat Telegram bot orqali kirish mumkin. Dastur yopilmoqda...</h2>";
+            setTimeout(() => tg.close(), 3000);
+        }
+
+        const DAILY_LIMIT = 15;
         let currentLevel = parseInt(localStorage.getItem('solar_memory_level')) || 1;
-        let gridSize, activeCellsCount, showTime;
-        let sequence = [];
-        let playerClicks = [];
-        let canClick = false;
+        let todayDate = new Date().toDateString();
+        let savedDate = localStorage.getItem('solar_last_date');
+        let dailyCount = parseInt(localStorage.getItem('solar_daily_count')) || 0;
 
-        const gridElement = document.getElementById('grid');
-        const levelDisplay = document.getElementById('level-display');
-        const startBtn = document.getElementById('start-btn');
-        const messageDisplay = document.getElementById('message');
+        // Kun o'zgarsa, limitni yangilaymiz
+        if (savedDate !== todayDate) {
+            dailyCount = 0;
+            localStorage.setItem('solar_last_date', todayDate);
+            localStorage.setItem('solar_daily_count', dailyCount);
+        }
+
+        let gridSize, activeCellsCount, showTime, sequence = [], playerClicks = [], canClick = false;
+
+        function checkLimit() {
+            document.getElementById('limit-display').innerText = dailyCount;
+            if (dailyCount >= DAILY_LIMIT) {
+                showOverlay(
+                    "Kognitiv Limitga Yetildi", 
+                    "Bugun miyangiz yetarlicha mashq qildi. Kognitiv charchoq o'sishga to'sqinlik qiladi. Natijani botga yuborib, ertaga davom eting.", 
+                    "Natijani saqlash va chiqish", 
+                    sendDataToBot
+                );
+                return true;
+            }
+            return false;
+        }
+
+        function showOverlay(title, desc, btnText, action) {
+            const overlay = document.getElementById('overlay');
+            document.getElementById('overlay-title').innerText = title;
+            document.getElementById('overlay-desc').innerText = desc;
+            const btn = document.getElementById('overlay-btn');
+            btn.innerText = btnText;
+            btn.onclick = action;
+            overlay.style.display = 'flex';
+        }
+
+        function sendDataToBot() {
+            // Ma'lumotni botga yuboramiz (JSON formatida)
+            const data = JSON.stringify({
+                action: "daily_finished",
+                level: currentLevel,
+                date: todayDate
+            });
+            tg.sendData(data); // Bu botga xabar jo'natadi va Mini App'ni yopadi
+        }
 
         function initLevelParameters() {
-            // Matematik algoritm: 1 oyda oxiriga yetib bo'lmasligi uchun qiyinchilik eksponensial o'sadi
-            gridSize = Math.min(3 + Math.floor((currentLevel - 1) / 5), 6); // Max 6x6
+            if (checkLimit()) return;
+            gridSize = Math.min(3 + Math.floor((currentLevel - 1) / 5), 6); 
             activeCellsCount = Math.min(3 + Math.floor((currentLevel - 1) / 2), Math.floor((gridSize * gridSize) / 1.5));
-            showTime = Math.max(400, 2000 - (currentLevel * 30)); // 2 soniyadan boshlab 400 millisoniyagacha tushadi
+            showTime = Math.max(400, 2000 - (currentLevel * 30)); 
             
-            levelDisplay.innerText = currentLevel;
+            document.getElementById('level-display').innerText = currentLevel;
             renderGrid();
         }
 
         function renderGrid() {
+            const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';
             gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-            
-            // Ekran o'lchamiga moslashuvchi kataklar
-            const containerSize = Math.min(window.innerWidth * 0.8, 350);
-            const cellSize = (containerSize - (gridSize - 1) * 8) / gridSize;
+            const cellSize = (Math.min(window.innerWidth * 0.8, 350) - (gridSize - 1) * 8) / gridSize;
 
             for (let i = 0; i < gridSize * gridSize; i++) {
                 const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.style.width = `${cellSize}px`;
-                cell.style.height = `${cellSize}px`;
-                cell.dataset.index = i;
+                cell.className = 'cell';
+                cell.style.width = `${cellSize}px`; cell.style.height = `${cellSize}px`;
                 cell.onclick = () => handleCellClick(i, cell);
                 gridElement.appendChild(cell);
             }
         }
 
         function startLevel() {
-            startBtn.style.display = 'none';
-            messageDisplay.innerText = 'Diqqat...';
-            sequence = [];
-            playerClicks = [];
-            canClick = false;
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('message').innerText = 'Diqqat...';
+            sequence = []; playerClicks = []; canClick = false;
 
             const cells = document.querySelectorAll('.cell');
-            cells.forEach(c => { c.className = 'cell'; });
+            cells.forEach(c => c.className = 'cell');
 
-            // Tasodifiy kataklarni tanlash
-            let indices = Array.from({length: gridSize * gridSize}, (_, i) => i);
-            indices.sort(() => Math.random() - 0.5);
+            let indices = Array.from({length: gridSize * gridSize}, (_, i) => i).sort(() => Math.random() - 0.5);
             sequence = indices.slice(0, activeCellsCount);
 
-            // Kataklarni ko'rsatish
             setTimeout(() => {
-                messageDisplay.innerText = '';
-                sequence.forEach(index => {
-                    cells[index].classList.add('active');
-                });
-
-                // Blind spot (o'chirish)
+                document.getElementById('message').innerText = '';
+                sequence.forEach(i => cells[i].classList.add('active'));
                 setTimeout(() => {
                     cells.forEach(c => c.classList.remove('active'));
                     canClick = true;
-                    messageDisplay.innerText = 'Joylashuvni tiklang';
+                    document.getElementById('message').innerText = 'Joylashuvni tiklang';
                 }, showTime);
-
             }, 500);
         }
 
         function handleCellClick(index, cellElement) {
-            if (!canClick) return;
-
-            // Agar oldin bosilgan bo'lsa, hech narsa qilmaydi
-            if (playerClicks.includes(index)) return;
-
+            if (!canClick || playerClicks.includes(index)) return;
             playerClicks.push(index);
 
             if (sequence.includes(index)) {
                 cellElement.classList.add('active');
-                if (playerClicks.length === sequence.length) {
-                    levelComplete();
-                }
+                if (playerClicks.length === sequence.length) levelComplete();
             } else {
                 cellElement.classList.add('error');
                 gameOver();
@@ -190,42 +158,39 @@
 
         function levelComplete() {
             canClick = false;
-            messageDisplay.style.color = 'var(--primary-color)';
-            messageDisplay.innerText = 'Ajoyib!';
-            currentLevel++;
-            localStorage.setItem('solar_memory_level', currentLevel);
+            document.getElementById('message').style.color = 'var(--primary-color)';
+            document.getElementById('message').innerText = 'Ajoyib!';
             
-            setTimeout(() => {
-                messageDisplay.style.color = 'var(--text-color)';
-                messageDisplay.innerText = '';
-                startBtn.innerText = 'Keyingi daraja';
-                startBtn.style.display = 'block';
-                initLevelParameters();
-            }, 1000);
+            currentLevel++;
+            dailyCount++;
+            localStorage.setItem('solar_memory_level', currentLevel);
+            localStorage.setItem('solar_daily_count', dailyCount);
+            
+            setTimeout(() => resetUI('Keyingi daraja'), 1000);
         }
 
         function gameOver() {
             canClick = false;
-            messageDisplay.style.color = '#e74c3c';
-            messageDisplay.innerText = 'Xato! Neyronlar tiklanmoqda...';
+            document.getElementById('message').style.color = '#e74c3c';
+            document.getElementById('message').innerText = 'Xato! Neyronlar tiklanmoqda...';
             
-            // To'g'ri javoblarni ko'rsatib qo'yish
             const cells = document.querySelectorAll('.cell');
-            sequence.forEach(index => {
-                cells[index].style.backgroundColor = 'rgba(39, 174, 96, 0.4)'; // Yordamchi fon
-            });
+            sequence.forEach(i => cells[i].style.backgroundColor = 'rgba(39, 174, 96, 0.4)');
+            
+            dailyCount++;
+            localStorage.setItem('solar_daily_count', dailyCount);
 
-            // Orqaga qaytarish jazolash mantiqi (ixtiyoriy, hozircha faqat shu darajada qoldiramiz)
-            setTimeout(() => {
-                messageDisplay.style.color = 'var(--text-color)';
-                messageDisplay.innerText = '';
-                startBtn.innerText = 'Qayta urinish';
-                startBtn.style.display = 'block';
-                initLevelParameters();
-            }, 1500);
+            setTimeout(() => resetUI('Qayta urinish'), 1500);
         }
 
-        // Boshlang'ich holatni yuklash
+        function resetUI(btnText) {
+            document.getElementById('message').style.color = 'var(--text-color)';
+            document.getElementById('message').innerText = '';
+            document.getElementById('start-btn').innerText = btnText;
+            document.getElementById('start-btn').style.display = 'block';
+            initLevelParameters();
+        }
+
         initLevelParameters();
     </script>
 </body>
