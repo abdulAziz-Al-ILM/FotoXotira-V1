@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kognitiv Xotira</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #2c3e50;
+            --primary-color: #27ae60;
+            --cell-bg: #ecf0f1;
+            --cell-active: #27ae60;
+            --cell-hidden: #bdc3c7;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0 0 5px 0;
+            font-weight: 600;
+        }
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        #grid {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        .cell {
+            background-color: var(--cell-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .cell.active {
+            background-color: var(--cell-active);
+        }
+        .cell.error {
+            background-color: #e74c3c;
+        }
+        button {
+            background-color: var(--text-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: 500;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>Daraja: <span id="level-display">1</span></h1>
+        <p>Yashil kataklarni eslab qoling</p>
+    </div>
+
+    <div id="grid"></div>
+
+    <button id="start-btn" onclick="startLevel()">Boshlash</button>
+    <div id="message"></div>
+
+    <script>
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+
+        let currentLevel = parseInt(localStorage.getItem('solar_memory_level')) || 1;
+        let gridSize, activeCellsCount, showTime;
+        let sequence = [];
+        let playerClicks = [];
+        let canClick = false;
+
+        const gridElement = document.getElementById('grid');
+        const levelDisplay = document.getElementById('level-display');
+        const startBtn = document.getElementById('start-btn');
+        const messageDisplay = document.getElementById('message');
+
+        function initLevelParameters() {
+            // Matematik algoritm: 1 oyda oxiriga yetib bo'lmasligi uchun qiyinchilik eksponensial o'sadi
+            gridSize = Math.min(3 + Math.floor((currentLevel - 1) / 5), 6); // Max 6x6
+            activeCellsCount = Math.min(3 + Math.floor((currentLevel - 1) / 2), Math.floor((gridSize * gridSize) / 1.5));
+            showTime = Math.max(400, 2000 - (currentLevel * 30)); // 2 soniyadan boshlab 400 millisoniyagacha tushadi
+            
+            levelDisplay.innerText = currentLevel;
+            renderGrid();
+        }
+
+        function renderGrid() {
+            gridElement.innerHTML = '';
+            gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            
+            // Ekran o'lchamiga moslashuvchi kataklar
+            const containerSize = Math.min(window.innerWidth * 0.8, 350);
+            const cellSize = (containerSize - (gridSize - 1) * 8) / gridSize;
+
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.style.width = `${cellSize}px`;
+                cell.style.height = `${cellSize}px`;
+                cell.dataset.index = i;
+                cell.onclick = () => handleCellClick(i, cell);
+                gridElement.appendChild(cell);
+            }
+        }
+
+        function startLevel() {
+            startBtn.style.display = 'none';
+            messageDisplay.innerText = 'Diqqat...';
+            sequence = [];
+            playerClicks = [];
+            canClick = false;
+
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(c => { c.className = 'cell'; });
+
+            // Tasodifiy kataklarni tanlash
+            let indices = Array.from({length: gridSize * gridSize}, (_, i) => i);
+            indices.sort(() => Math.random() - 0.5);
+            sequence = indices.slice(0, activeCellsCount);
+
+            // Kataklarni ko'rsatish
+            setTimeout(() => {
+                messageDisplay.innerText = '';
+                sequence.forEach(index => {
+                    cells[index].classList.add('active');
+                });
+
+                // Blind spot (o'chirish)
+                setTimeout(() => {
+                    cells.forEach(c => c.classList.remove('active'));
+                    canClick = true;
+                    messageDisplay.innerText = 'Joylashuvni tiklang';
+                }, showTime);
+
+            }, 500);
+        }
+
+        function handleCellClick(index, cellElement) {
+            if (!canClick) return;
+
+            // Agar oldin bosilgan bo'lsa, hech narsa qilmaydi
+            if (playerClicks.includes(index)) return;
+
+            playerClicks.push(index);
+
+            if (sequence.includes(index)) {
+                cellElement.classList.add('active');
+                if (playerClicks.length === sequence.length) {
+                    levelComplete();
+                }
+            } else {
+                cellElement.classList.add('error');
+                gameOver();
+            }
+        }
+
+        function levelComplete() {
+            canClick = false;
+            messageDisplay.style.color = 'var(--primary-color)';
+            messageDisplay.innerText = 'Ajoyib!';
+            currentLevel++;
+            localStorage.setItem('solar_memory_level', currentLevel);
+            
+            setTimeout(() => {
+                messageDisplay.style.color = 'var(--text-color)';
+                messageDisplay.innerText = '';
+                startBtn.innerText = 'Keyingi daraja';
+                startBtn.style.display = 'block';
+                initLevelParameters();
+            }, 1000);
+        }
+
+        function gameOver() {
+            canClick = false;
+            messageDisplay.style.color = '#e74c3c';
+            messageDisplay.innerText = 'Xato! Neyronlar tiklanmoqda...';
+            
+            // To'g'ri javoblarni ko'rsatib qo'yish
+            const cells = document.querySelectorAll('.cell');
+            sequence.forEach(index => {
+                cells[index].style.backgroundColor = 'rgba(39, 174, 96, 0.4)'; // Yordamchi fon
+            });
+
+            // Orqaga qaytarish jazolash mantiqi (ixtiyoriy, hozircha faqat shu darajada qoldiramiz)
+            setTimeout(() => {
+                messageDisplay.style.color = 'var(--text-color)';
+                messageDisplay.innerText = '';
+                startBtn.innerText = 'Qayta urinish';
+                startBtn.style.display = 'block';
+                initLevelParameters();
+            }, 1500);
+        }
+
+        // Boshlang'ich holatni yuklash
+        initLevelParameters();
+    </script>
+</body>
+</html>
