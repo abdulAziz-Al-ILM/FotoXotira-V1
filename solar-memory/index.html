@@ -24,7 +24,6 @@
             user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* Xatolik bloki */
         #tg-block {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 999; flex-direction: column;
@@ -33,7 +32,6 @@
         #tg-block h2 { margin-bottom: 15px; font-size: 22px; }
         #tg-block p { color: var(--secondary-text); margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
 
-        /* TABS (Tepaga navigatsiya) */
         .tabs {
             display: flex; width: 100%; max-width: 400px; margin-top: 15px;
             background: var(--cell-bg); border-radius: 20px; padding: 5px; box-sizing: border-box;
@@ -44,7 +42,6 @@
         }
         .tab.active { background: #ffffff; color: var(--text-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-        /* Asosiy konteynerlar */
         .section { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 400px; padding: 20px; box-sizing: border-box; flex-grow: 1; justify-content: center; }
         .section.active { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -52,28 +49,44 @@
         h1 { font-size: 24px; margin: 0 0 10px 0; letter-spacing: -0.5px; font-weight: 800; text-transform: uppercase; text-align: center;}
         .stats { margin: 0 0 25px 0; font-size: 13px; color: var(--secondary-text); font-weight: 700; background: rgba(128, 142, 155, 0.1); padding: 6px 16px; border-radius: 20px; text-transform: uppercase;}
         
-        /* Mashq qismi (Grid) */
         #grid { display: grid; gap: 10px; margin-bottom: 30px; padding: 15px; background: #ffffff; border-radius: 20px; box-shadow: var(--shadow); transition: all 0.3s; }
         .cell { background-color: var(--cell-bg); border-radius: 12px; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .cell.active { background-color: var(--cell-active); transform: scale(0.95); box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
         .cell.error { background-color: var(--cell-error); }
 
-        /* Imtihon qismi (So'zlar) */
-        #exam-desc { color: var(--secondary-text); font-size: 14px; margin-bottom: 30px; line-height: 1.6; font-weight: 500; text-align: center;}
-        #word-display { font-size: 32px; font-weight: 800; letter-spacing: 2px; min-height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; text-transform: uppercase; text-align: center; }
+        #exam-desc { color: var(--secondary-text); font-size: 13px; margin-bottom: 20px; line-height: 1.5; font-weight: 500; text-align: center; }
+        
+        /* Imtihon so'zlari 20 ta bo'lgani uchun kichraytirildi */
+        #word-display { 
+            font-size: 18px; font-weight: 800; letter-spacing: 1px; line-height: 1.6;
+            min-height: 120px; display: flex; align-items: center; justify-content: center; 
+            margin-bottom: 30px; text-transform: uppercase; text-align: center; color: var(--text-color);
+        }
+        
         #input-container { display: none; width: 100%; flex-direction: column; }
-        input[type="text"] { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #dfe4ea; border-radius: 16px; margin-bottom: 20px; box-sizing: border-box; text-align: center; font-weight: 700; text-transform: uppercase; }
-        input[type="text"]:focus { outline: none; border-color: var(--primary-color); }
+        
+        /* 20 ta so'z yozish uchun textarea ga o'zgartirildi */
+        textarea { 
+            width: 100%; padding: 16px; font-size: 16px; border: 2px solid #dfe4ea; 
+            border-radius: 16px; margin-bottom: 20px; box-sizing: border-box; 
+            text-align: center; font-weight: 700; text-transform: uppercase; 
+            font-family: inherit; resize: none; height: 120px;
+        }
+        textarea:focus { outline: none; border-color: var(--primary-color); }
+        
         .result-score { font-size: 56px; font-weight: 800; letter-spacing: -2px; }
 
-        /* Umumiy elementlar */
-        button { background-color: var(--text-color); color: #ffffff; border: none; padding: 16px 36px; font-size: 16px; border-radius: 30px; cursor: pointer; font-weight: 700; box-shadow: 0 8px 20px rgba(30, 39, 46, 0.15); transition: all 0.2s; }
+        button { background-color: var(--text-color); color: #ffffff; border: none; padding: 16px 36px; font-size: 16px; border-radius: 30px; cursor: pointer; font-weight: 700; box-shadow: 0 8px 20px rgba(30, 39, 46, 0.15); transition: all 0.2s; width: 100%; max-width: 300px; }
         button:active { transform: translateY(2px); }
+        
+        .secondary-btn { background-color: transparent; color: var(--text-color); border: 2px solid var(--text-color); margin-top: 15px; box-shadow: none; }
+        
         #message { margin-top: 20px; font-weight: 700; font-size: 16px; height: 20px; text-align: center; }
 
-        /* Overlay */
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(252, 253, 252, 0.95); backdrop-filter: blur(5px); z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        
+        #overlay-title { margin-bottom: 15px; font-size: 24px; color: var(--text-color); }
+        #overlay-desc { margin-bottom: 30px; color: var(--secondary-text); font-size: 15px; line-height: 1.6; max-width: 300px; white-space: pre-wrap; }
+
         #footer { margin-top: auto; padding-bottom: 15px; text-align: center; width: 100%; }
         .signature { font-size: 11px; color: #a4b0be; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
     </style>
@@ -102,21 +115,22 @@
     <div id="imtihon-section" class="section">
         <h1 id="exam-title">Kognitiv Imtihon</h1>
         <p class="stats" id="exam-limit-status"></p>
-        <p id="exam-desc">Ekranda 4 ta mantiqsiz so'z roppa-rosa <b>2 soniya</b> paydo bo'ladi. Ularni fotografik xotiraga muhrlang. Yordam bo'lmaydi.</p>
+        <p id="exam-desc">Ekranda <b>20 ta mantiqsiz so'z</b> roppa-rosa <b>4 soniya</b> paydo bo'ladi. Fotografik xotirani ishga tushiring.</p>
 
         <div id="word-display"></div>
 
         <div id="input-container">
-            <input type="text" id="user-input" placeholder="SO'ZLARNI KIRITING" autocomplete="off" spellcheck="false">
+            <textarea id="user-input" placeholder="ESLAB QOLGAN SO'ZLARINGIZNI KIRITING..." autocomplete="off" spellcheck="false"></textarea>
             <button id="submit-btn" onclick="checkResult()">Tahlil qilish</button>
         </div>
 
         <button id="exam-start-btn" onclick="startExam()">Imtihonni boshlash</button>
+        <button id="exam-retry-btn" class="secondary-btn" onclick="resetExamUI()" style="display: none;">Qayta urinish</button>
     </div>
 
     <div id="overlay">
-        <h2 id="overlay-title" style="margin-bottom: 15px; color: var(--text-color);"></h2>
-        <p id="overlay-desc" style="margin-bottom: 30px; color: var(--secondary-text); font-size: 15px; line-height: 1.6; max-width: 300px; white-space: pre-wrap;"></p>
+        <h2 id="overlay-title"></h2>
+        <p id="overlay-desc"></p>
         <button id="overlay-btn"></button>
     </div>
 
@@ -137,7 +151,6 @@
             document.getElementById('footer').style.display = 'none';
         }
 
-        // --- TAB LOGIKASI ---
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -151,7 +164,7 @@
             }
         }
 
-        // === 1. MASHQ LOGIKASI ===
+        // === 1. MASHQ LOGIKASI (O'zgarishsiz) ===
         const DAILY_LIMIT = 90;
         const SESSION_LIMIT = 30;
         const COOLDOWN_MS = 60 * 60 * 1000; 
@@ -191,7 +204,9 @@
 
                 if (timePassed < COOLDOWN_MS) {
                     let timeLeft = Math.ceil((COOLDOWN_MS - timePassed) / 60000); 
-                    showOverlay("Neyronlar Qizib Ketdi", `Sessiya yakunlandi. Miya axborotni sintez qilishi uchun tanaffus zarur.\n\nTizim ochilishiga: ${timeLeft} daqiqa qoldi.`, "Kutish", () => tg.close());
+                    showOverlay("Neyronlar Qizib Ketdi", `Sessiya yakunlandi. Miya axborotni sintez qilishi uchun tanaffus zarur.\n\nTizim ochilishiga: ${timeLeft} daqiqa qoldi.`, "Kutish", () => {
+                        document.getElementById('overlay').style.display = 'none';
+                    });
                     return true;
                 } else {
                     sessionCount = 0;
@@ -308,43 +323,73 @@
             initLevelParameters();
         }
 
-        // === 2. IMTIHON LOGIKASI ===
+        // === 2. IMTIHON LOGIKASI (20 ta so'z, Tanaffus, Qayta urinish) ===
         const DAILY_EXAM_LIMIT = 5;
+        const EXAM_COOLDOWN_MS = 15 * 60 * 1000; // 15 daqiqa
+        
         let savedExamDate = localStorage.getItem('solar_exam_date');
         let examCount = parseInt(localStorage.getItem('solar_exam_count')) || 0;
+        let lastExamTime = parseInt(localStorage.getItem('solar_last_exam_time')) || 0;
 
         if (savedExamDate !== todayDate) {
-            examCount = 0;
+            examCount = 0; lastExamTime = 0;
             localStorage.setItem('solar_exam_date', todayDate);
             localStorage.setItem('solar_exam_count', examCount);
+            localStorage.setItem('solar_last_exam_time', lastExamTime);
         }
 
         const examLimitStatus = document.getElementById('exam-limit-status');
         examLimitStatus.innerText = `Urinishlar: ${examCount} / ${DAILY_EXAM_LIMIT}`;
 
-        const wordsDB = ["NEYRON", "KVANT", "IDROK", "SAMO", "ZAMIN", "UFQ", "MANTIQ", "ZANJIR", "QUDRAT", "IRODA", "SINTEZ", "MODDA", "VEKTOR", "OQIM", "ZARBA", "CHEGARA", "SFERA", "KOGNITIV", "DINAMIKA", "FOKUS", "MIZAN", "NIZOM", "ALGORITM", "ENERGIYA", "RITM", "MASOFA", "DAVR", "ILLUZIYA", "MAKON", "SIG'IM"];
+        // 50 tadan ortiq so'zlar bazasi (takrorlanmaslik ehtimolini oshirish uchun)
+        const wordsDB = [
+            "NEYRON", "KVANT", "IDROK", "SAMO", "ZAMIN", "UFQ", "MANTIQ", "ZANJIR", "QUDRAT", "IRODA", "CHUCHVARA", "FIZIKA", "BIOLOGIYA",
+            "SINTEZ", "MODDA", "VEKTOR", "OQIM", "ZARBA", "CHEGARA", "SFERA", "KOGNITIV", "DINAMIKA", "FOKUS", "KOMPYUTER",
+            "MIZAN", "NIZOM", "ALGORITM", "ENERGIYA", "RITM", "MASOFA", "DAVR", "ILLUZIYA", "MAKON", "SIG'IM",
+            "ABSTRAKT", "FUNKSIYA", "GRAFIKA", "POLIGON", "KOD", "IMPULS", "REFLEKS", "GENETIKA", "SIVILIZATSIYA",
+            "EVOLYUTSIYA", "ENERGETIKA", "MEXANIZM", "GIPOTEZA", "FAKTOR", "INDUKSIYA", "DEDUKSIYA", "REAKSIYA",
+            "KINETIKA", "STATIKA", "MATRITSA", "SPEKTR", "AMPLITUDA", "CHASTOTA", "KORDINATA", "MODUL"
+        ];
+        
         let targetString = "";
         let examLocked = false;
 
-        if (examCount >= DAILY_EXAM_LIMIT) lockExamSystem();
+        function checkExamCooldown() {
+            if (examCount >= DAILY_EXAM_LIMIT) {
+                lockExamSystem();
+                return true;
+            }
+            let now = Date.now();
+            if (lastExamTime > 0 && (now - lastExamTime < EXAM_COOLDOWN_MS)) {
+                let timeLeft = Math.ceil((EXAM_COOLDOWN_MS - (now - lastExamTime)) / 60000);
+                showOverlay("Kognitiv Sovish", `Miya 20 ta ma'lumotni sintez qilishi uchun qat'iy tanaffus zarur.\n\nQolgan vaqt: ${timeLeft} daqiqa.`, "Kutish", () => {
+                    document.getElementById('overlay').style.display = 'none';
+                });
+                return true;
+            }
+            return false;
+        }
 
         function lockExamSystem() {
             examLocked = true;
-            document.getElementById('exam-title').innerText = "Tizim Qulflangan";
+            document.getElementById('exam-title').innerText = "Imtihon Qulflangan";
             document.getElementById('exam-title').style.color = "var(--error-color)";
-            document.getElementById('exam-desc').innerHTML = "Bugungi kognitiv imtihon limiti tugadi.<br>Charchagan neyronlar bilan obyektiv natija qayd etib bo'lmaydi.";
+            document.getElementById('exam-desc').innerHTML = "Bugungi kognitiv imtihon limiti tugadi.<br>Ertaga reallikka qaytasiz.";
             document.getElementById('exam-start-btn').style.display = 'none';
+            document.getElementById('exam-retry-btn').style.display = 'none';
         }
 
         function startExam() {
-            if (examLocked || examCount >= DAILY_EXAM_LIMIT) return;
+            if (checkExamCooldown()) return;
 
             document.getElementById('exam-start-btn').style.display = 'none';
+            document.getElementById('exam-retry-btn').style.display = 'none';
             document.getElementById('exam-desc').style.display = 'none';
             examLimitStatus.style.display = 'none';
             
+            // 20 ta so'z tanlab olinadi
             let shuffled = [...wordsDB].sort(() => 0.5 - Math.random());
-            targetString = shuffled.slice(0, 4).join(" ").toUpperCase();
+            targetString = shuffled.slice(0, 20).join(" ").toUpperCase();
 
             const display = document.getElementById('word-display');
             let count = 3;
@@ -365,12 +410,13 @@
             const display = document.getElementById('word-display');
             display.innerText = targetString;
             
+            // 20 ta so'z uchun aynan 4 soniya (4000ms) beriladi
             setTimeout(() => {
                 display.innerText = "";
                 document.getElementById('exam-title').innerText = "Tiklash bosqichi";
                 document.getElementById('input-container').style.display = 'flex';
                 document.getElementById('user-input').focus();
-            }, 2000);
+            }, 4000);
         }
 
         function levenshteinDistance(a, b) {
@@ -400,22 +446,45 @@
             let accuracy = 0;
             if (maxLength > 0) accuracy = ((1 - (distance / maxLength)) * 100).toFixed(1);
 
+            // Limit va vaqtni yangilash
             examCount++;
+            lastExamTime = Date.now();
             localStorage.setItem('solar_exam_count', examCount);
+            localStorage.setItem('solar_last_exam_time', lastExamTime);
 
             document.getElementById('input-container').style.display = 'none';
             const display = document.getElementById('word-display');
             
-            const resultColor = accuracy >= 75 ? 'var(--primary-color)' : 'var(--error-color)';
+            const resultColor = accuracy >= 30 ? 'var(--primary-color)' : 'var(--error-color)';
             display.innerHTML = `<span class="result-score" style="color: ${resultColor};">${accuracy}%</span>`;
             document.getElementById('exam-title').innerText = "Kognitiv Aniqlik";
 
+            // Botga jo'natish (Agar menu buttondan kirsangiz jim yopilmasligi uchun, timeout bilan qayta urinish tugmasi chiqadi)
+            tg.sendData(JSON.stringify({ action: "exam_finished", accuracy: parseFloat(accuracy) }));
+            
             setTimeout(() => {
-                tg.sendData(JSON.stringify({ action: "exam_finished", accuracy: parseFloat(accuracy) }));
-            }, 2500);
+                document.getElementById('exam-retry-btn').style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Tahlil qilish";
+            }, 1000);
         }
 
-        // Boshlang'ich yuklash
+        function resetExamUI() {
+            document.getElementById('word-display').innerHTML = '';
+            document.getElementById('user-input').value = '';
+            document.getElementById('exam-retry-btn').style.display = 'none';
+            document.getElementById('exam-title').innerText = 'Kognitiv Imtihon';
+            document.getElementById('exam-desc').style.display = 'block';
+            examLimitStatus.style.display = 'block';
+            examLimitStatus.innerText = `Urinishlar: ${examCount} / ${DAILY_EXAM_LIMIT}`;
+            
+            if (examCount < DAILY_EXAM_LIMIT) {
+                document.getElementById('exam-start-btn').style.display = 'block';
+            } else {
+                lockExamSystem();
+            }
+        }
+
         initLevelParameters();
     </script>
 </body>
