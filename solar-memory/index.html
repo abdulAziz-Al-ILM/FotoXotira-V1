@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bazaviy Trenajyor | ILM SolarArk</title>
+    <title>Kognitiv Tizim | ILM SolarArk</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -17,135 +17,107 @@
             --secondary-text: #808e9b;
         }
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg-color); color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            height: 100vh;
-            margin: 0;
-            padding: 20px 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            height: 100vh; margin: 0; padding: 0; box-sizing: border-box;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
+        /* Xatolik bloki */
         #tg-block {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 999; flex-direction: column;
             justify-content: center; align-items: center; text-align: center; padding: 30px; box-sizing: border-box;
         }
-        #tg-block h2 { color: var(--text-color); margin-bottom: 15px; font-size: 22px; }
+        #tg-block h2 { margin-bottom: 15px; font-size: 22px; }
         #tg-block p { color: var(--secondary-text); margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
-        #tg-block a {
-            background-color: var(--primary-color); color: white; padding: 14px 32px;
-            text-decoration: none; border-radius: 30px; font-weight: 700; font-size: 16px;
-            box-shadow: 0 8px 20px rgba(5, 196, 107, 0.3); transition: all 0.2s;
-        }
 
-        #overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(252, 253, 252, 0.95); backdrop-filter: blur(5px); z-index: 100;
-            flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;
+        /* TABS (Tepaga navigatsiya) */
+        .tabs {
+            display: flex; width: 100%; max-width: 400px; margin-top: 15px;
+            background: var(--cell-bg); border-radius: 20px; padding: 5px; box-sizing: border-box;
         }
-        #overlay-title { margin-bottom: 15px; font-size: 24px; color: var(--text-color); }
-        #overlay-desc { margin-bottom: 30px; color: var(--secondary-text); font-size: 15px; line-height: 1.6; max-width: 300px; white-space: pre-wrap; }
-
-        #main-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            flex-grow: 1;
-            justify-content: center;
+        .tab {
+            flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 700;
+            color: var(--secondary-text); border-radius: 16px; cursor: pointer; transition: 0.3s;
         }
+        .tab.active { background: #ffffff; color: var(--text-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-        #header { text-align: center; margin-bottom: 25px; }
-        h1 { font-size: 26px; margin: 0 0 8px 0; letter-spacing: -0.5px; font-weight: 800; }
-        p.stats { margin: 0; font-size: 14px; color: var(--secondary-text); font-weight: 600; background: rgba(128, 142, 155, 0.1); padding: 6px 16px; border-radius: 20px; display: inline-block; }
+        /* Asosiy konteynerlar */
+        .section { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 400px; padding: 20px; box-sizing: border-box; flex-grow: 1; justify-content: center; }
+        .section.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 24px; margin: 0 0 10px 0; letter-spacing: -0.5px; font-weight: 800; text-transform: uppercase; text-align: center;}
+        .stats { margin: 0 0 25px 0; font-size: 13px; color: var(--secondary-text); font-weight: 700; background: rgba(128, 142, 155, 0.1); padding: 6px 16px; border-radius: 20px; text-transform: uppercase;}
         
-        #grid { 
-            display: grid; 
-            gap: 10px; 
-            margin-bottom: 30px; 
-            padding: 15px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .cell { 
-            background-color: var(--cell-bg); 
-            border-radius: 12px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
+        /* Mashq qismi (Grid) */
+        #grid { display: grid; gap: 10px; margin-bottom: 30px; padding: 15px; background: #ffffff; border-radius: 20px; box-shadow: var(--shadow); transition: all 0.3s; }
+        .cell { background-color: var(--cell-bg); border-radius: 12px; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .cell.active { background-color: var(--cell-active); transform: scale(0.95); box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
-        .cell.error { background-color: var(--cell-error); animation: shake 0.3s ease-in-out; }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+        .cell.error { background-color: var(--cell-error); }
 
-        button { 
-            background-color: var(--text-color); 
-            color: #ffffff; 
-            border: none; 
-            padding: 16px 36px; 
-            font-size: 16px; 
-            border-radius: 30px; 
-            cursor: pointer; 
-            font-weight: 700; 
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 20px rgba(30, 39, 46, 0.15);
-            transition: all 0.2s;
-        }
-        button:active { transform: translateY(2px); box-shadow: 0 4px 10px rgba(30, 39, 46, 0.15); }
+        /* Imtihon qismi (So'zlar) */
+        #exam-desc { color: var(--secondary-text); font-size: 14px; margin-bottom: 30px; line-height: 1.6; font-weight: 500; text-align: center;}
+        #word-display { font-size: 32px; font-weight: 800; letter-spacing: 2px; min-height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; text-transform: uppercase; text-align: center; }
+        #input-container { display: none; width: 100%; flex-direction: column; }
+        input[type="text"] { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #dfe4ea; border-radius: 16px; margin-bottom: 20px; box-sizing: border-box; text-align: center; font-weight: 700; text-transform: uppercase; }
+        input[type="text"]:focus { outline: none; border-color: var(--primary-color); }
+        .result-score { font-size: 56px; font-weight: 800; letter-spacing: -2px; }
+
+        /* Umumiy elementlar */
+        button { background-color: var(--text-color); color: #ffffff; border: none; padding: 16px 36px; font-size: 16px; border-radius: 30px; cursor: pointer; font-weight: 700; box-shadow: 0 8px 20px rgba(30, 39, 46, 0.15); transition: all 0.2s; }
+        button:active { transform: translateY(2px); }
+        #message { margin-top: 20px; font-weight: 700; font-size: 16px; height: 20px; text-align: center; }
+
+        /* Overlay */
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(252, 253, 252, 0.95); backdrop-filter: blur(5px); z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
         
-        #message { margin-top: 20px; font-weight: 700; font-size: 16px; height: 20px; letter-spacing: 0.3px; }
-        
-        #footer {
-            margin-top: auto;
-            text-align: center;
-            padding-bottom: 10px;
-        }
-        .signature {
-            font-size: 11px;
-            color: #a4b0be;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 800;
-        }
+        #footer { margin-top: auto; padding-bottom: 15px; text-align: center; width: 100%; }
+        .signature { font-size: 11px; color: #a4b0be; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
     </style>
 </head>
 <body>
 
     <div id="tg-block">
         <h2>Tizimga kirish rad etildi</h2>
-        <p>Bazaviy trenajyor faqat yopiq Telegram muhitida ishlaydi.</p>
-        <a href="https://t.me/FotoXotiraBot">@FotoXotiraBot</a>
+        <p>Kognitiv Tizim faqat yopiq Telegram muhitida ishlaydi.</p>
     </div>
 
-    <div id="overlay">
-        <h2 id="overlay-title"></h2>
-        <p id="overlay-desc"></p>
-        <button id="overlay-btn"></button>
+    <div class="tabs" id="app-tabs">
+        <div class="tab active" onclick="switchTab('mashq')">Bazaviy Mashq</div>
+        <div class="tab" onclick="switchTab('imtihon')">Maxsus Imtihon</div>
     </div>
 
-    <div id="main-container">
-        <div id="header">
-            <h1>Daraja: <span id="level-display">1</span></h1>
-            <p class="stats">Sessiya: <span id="session-display">0</span>/30 | Umumiy: <span id="limit-display">0</span>/90</p>
-        </div>
-
+    <div id="mashq-section" class="section active">
+        <h1>Daraja: <span id="level-display">1</span></h1>
+        <p class="stats">Sessiya: <span id="session-display">0</span>/30 | Umumiy: <span id="limit-display">0</span>/90</p>
+        
         <div id="grid"></div>
         <button id="start-btn" onclick="startLevel()">Zarbani qabul qilish</button>
         <div id="message"></div>
+    </div>
+
+    <div id="imtihon-section" class="section">
+        <h1 id="exam-title">Kognitiv Imtihon</h1>
+        <p class="stats" id="exam-limit-status"></p>
+        <p id="exam-desc">Ekranda 4 ta mantiqsiz so'z roppa-rosa <b>2 soniya</b> paydo bo'ladi. Ularni fotografik xotiraga muhrlang. Yordam bo'lmaydi.</p>
+
+        <div id="word-display"></div>
+
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="SO'ZLARNI KIRITING" autocomplete="off" spellcheck="false">
+            <button id="submit-btn" onclick="checkResult()">Tahlil qilish</button>
+        </div>
+
+        <button id="exam-start-btn" onclick="startExam()">Imtihonni boshlash</button>
+    </div>
+
+    <div id="overlay">
+        <h2 id="overlay-title" style="margin-bottom: 15px; color: var(--text-color);"></h2>
+        <p id="overlay-desc" style="margin-bottom: 30px; color: var(--secondary-text); font-size: 15px; line-height: 1.6; max-width: 300px; white-space: pre-wrap;"></p>
+        <button id="overlay-btn"></button>
     </div>
 
     <div id="footer">
@@ -159,28 +131,41 @@
 
         if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
             document.getElementById('tg-block').style.display = 'flex';
-            document.getElementById('main-container').style.display = 'none';
+            document.getElementById('app-tabs').style.display = 'none';
+            document.getElementById('mashq-section').style.display = 'none';
+            document.getElementById('imtihon-section').style.display = 'none';
             document.getElementById('footer').style.display = 'none';
         }
 
-        // Qat'iy kognitiv yuklama limitlari
+        // --- TAB LOGIKASI ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            if(tabName === 'mashq') {
+                document.querySelector('.tabs div:nth-child(1)').classList.add('active');
+                document.getElementById('mashq-section').classList.add('active');
+            } else {
+                document.querySelector('.tabs div:nth-child(2)').classList.add('active');
+                document.getElementById('imtihon-section').classList.add('active');
+            }
+        }
+
+        // === 1. MASHQ LOGIKASI ===
         const DAILY_LIMIT = 90;
         const SESSION_LIMIT = 30;
-        const COOLDOWN_MS = 60 * 60 * 1000; // 1 soat (millisoniyalarda)
+        const COOLDOWN_MS = 60 * 60 * 1000; 
 
         let currentLevel = parseInt(localStorage.getItem('solar_memory_level')) || 1;
         let todayDate = new Date().toDateString();
-        
         let savedDate = localStorage.getItem('solar_last_date');
+        
         let dailyCount = parseInt(localStorage.getItem('solar_daily_count')) || 0;
         let sessionCount = parseInt(localStorage.getItem('solar_session_count')) || 0;
         let lastSessionTime = parseInt(localStorage.getItem('solar_last_session_time')) || 0;
 
-        // Yangi kun boshlanganda tizimni nollash
         if (savedDate !== todayDate) {
-            dailyCount = 0;
-            sessionCount = 0;
-            lastSessionTime = 0;
+            dailyCount = 0; sessionCount = 0; lastSessionTime = 0;
             localStorage.setItem('solar_last_date', todayDate);
             localStorage.setItem('solar_daily_count', dailyCount);
             localStorage.setItem('solar_session_count', sessionCount);
@@ -189,37 +174,26 @@
 
         let gridSize, activeCellsCount, showTime, sequence = [], playerClicks = [], canClick = false;
 
-        function checkLimit() {
+        function checkGridLimit() {
             document.getElementById('session-display').innerText = sessionCount;
             document.getElementById('limit-display').innerText = dailyCount;
 
-            // 1. Kunlik absolyut limit (90 ta)
             if (dailyCount >= DAILY_LIMIT) {
-                showOverlay(
-                    "Kognitiv Limit [90/90]", 
-                    "Bugungi maksimal neyron zo'riqishi bajarildi. Tizim qulflandi. Ertaga qolgan joyidan davom etamiz.", 
-                    "Sintezni saqlash", 
-                    () => tg.sendData(JSON.stringify({ action: "daily_finished", level: currentLevel, date: todayDate }))
-                );
+                showOverlay("Kognitiv Limit [90/90]", "Bugungi maksimal neyron zo'riqishi bajarildi. Tizim qulflandi.", "Sintezni saqlash", () => {
+                    tg.sendData(JSON.stringify({ action: "daily_finished", level: currentLevel, date: todayDate }));
+                });
                 return true;
             }
 
-            // 2. Sessiya limiti (30 ta) va 1 soatlik tanaffus algoritmi
             if (sessionCount >= SESSION_LIMIT) {
                 let now = Date.now();
                 let timePassed = now - lastSessionTime;
 
                 if (timePassed < COOLDOWN_MS) {
                     let timeLeft = Math.ceil((COOLDOWN_MS - timePassed) / 60000); 
-                    showOverlay(
-                        "Neyronlar Qizib Ketdi", 
-                        `Sessiya yakunlandi. Miya axborotni sintez qilishi uchun qat'iy tanaffus zarur.\n\nTizim ochilishiga: ${timeLeft} daqiqa qoldi.`, 
-                        "Kutish", 
-                        () => tg.close() 
-                    );
+                    showOverlay("Neyronlar Qizib Ketdi", `Sessiya yakunlandi. Miya axborotni sintez qilishi uchun tanaffus zarur.\n\nTizim ochilishiga: ${timeLeft} daqiqa qoldi.`, "Kutish", () => tg.close());
                     return true;
                 } else {
-                    // Tanaffus yakunlangan, yangi sessiya ochiladi
                     sessionCount = 0;
                     localStorage.setItem('solar_session_count', sessionCount);
                     document.getElementById('session-display').innerText = sessionCount;
@@ -238,27 +212,19 @@
             overlay.style.display = 'flex';
         }
 
-        function updateProgress() {
-            dailyCount++;
-            sessionCount++;
-            
+        function updateGridProgress() {
+            dailyCount++; sessionCount++;
             localStorage.setItem('solar_memory_level', currentLevel);
             localStorage.setItem('solar_daily_count', dailyCount);
             localStorage.setItem('solar_session_count', sessionCount);
-
-            if (sessionCount === SESSION_LIMIT) {
-                localStorage.setItem('solar_last_session_time', Date.now());
-            }
+            if (sessionCount === SESSION_LIMIT) localStorage.setItem('solar_last_session_time', Date.now());
         }
 
         function initLevelParameters() {
-            if (checkLimit()) return;
-            
-            // Adaptiv qiyinlashuv algoritmi
+            if (checkGridLimit()) return;
             gridSize = Math.min(3 + Math.floor((currentLevel - 1) / 5), 6); 
             activeCellsCount = Math.min(3 + Math.floor((currentLevel - 1) / 2), Math.floor((gridSize * gridSize) / 1.5));
             showTime = Math.max(300, 2000 - (currentLevel * 35)); 
-            
             document.getElementById('level-display').innerText = currentLevel;
             renderGrid();
         }
@@ -267,15 +233,13 @@
             const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';
             gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-            
             const containerSize = Math.min(window.innerWidth * 0.85, 380);
             const cellSize = (containerSize - 30 - (gridSize - 1) * 10) / gridSize;
 
             for (let i = 0; i < gridSize * gridSize; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.style.width = `${cellSize}px`; 
-                cell.style.height = `${cellSize}px`;
+                cell.style.width = `${cellSize}px`; cell.style.height = `${cellSize}px`;
                 cell.onclick = () => handleCellClick(i, cell);
                 gridElement.appendChild(cell);
             }
@@ -290,15 +254,12 @@
             const cells = document.querySelectorAll('.cell');
             cells.forEach(c => { c.className = 'cell'; c.style.backgroundColor = ''; });
 
-            // Kataklarni tasodifiy tanlash
             let indices = Array.from({length: gridSize * gridSize}, (_, i) => i).sort(() => Math.random() - 0.5);
             sequence = indices.slice(0, activeCellsCount);
 
             setTimeout(() => {
                 document.getElementById('message').innerText = '';
                 sequence.forEach(i => cells[i].classList.add('active'));
-                
-                // Blind spot (kognitiv uzilish)
                 setTimeout(() => {
                     cells.forEach(c => c.classList.remove('active'));
                     canClick = true;
@@ -324,10 +285,7 @@
             canClick = false;
             document.getElementById('message').style.color = 'var(--primary-color)';
             document.getElementById('message').innerText = 'Mukammal yechim';
-            
-            currentLevel++;
-            updateProgress();
-            
+            currentLevel++; updateGridProgress();
             setTimeout(() => resetUI('Keyingi daraja'), 1200);
         }
 
@@ -335,16 +293,11 @@
             canClick = false;
             document.getElementById('message').style.color = 'var(--cell-error)';
             document.getElementById('message').innerText = 'Xato. Neyronlar qabul qilmadi.';
-            
             const cells = document.querySelectorAll('.cell');
             sequence.forEach(i => {
-                if (!playerClicks.includes(i)) {
-                    cells[i].style.backgroundColor = 'rgba(5, 196, 107, 0.2)'; // Yordamchi tasvir (To'g'ri javoblar izi)
-                }
+                if (!playerClicks.includes(i)) cells[i].style.backgroundColor = 'rgba(5, 196, 107, 0.2)';
             });
-            
-            updateProgress();
-
+            updateGridProgress();
             setTimeout(() => resetUI('Qayta urinish'), 1800);
         }
 
@@ -355,6 +308,114 @@
             initLevelParameters();
         }
 
+        // === 2. IMTIHON LOGIKASI ===
+        const DAILY_EXAM_LIMIT = 5;
+        let savedExamDate = localStorage.getItem('solar_exam_date');
+        let examCount = parseInt(localStorage.getItem('solar_exam_count')) || 0;
+
+        if (savedExamDate !== todayDate) {
+            examCount = 0;
+            localStorage.setItem('solar_exam_date', todayDate);
+            localStorage.setItem('solar_exam_count', examCount);
+        }
+
+        const examLimitStatus = document.getElementById('exam-limit-status');
+        examLimitStatus.innerText = `Urinishlar: ${examCount} / ${DAILY_EXAM_LIMIT}`;
+
+        const wordsDB = ["NEYRON", "KVANT", "IDROK", "SAMO", "ZAMIN", "UFQ", "MANTIQ", "ZANJIR", "QUDRAT", "IRODA", "SINTEZ", "MODDA", "VEKTOR", "OQIM", "ZARBA", "CHEGARA", "SFERA", "KOGNITIV", "DINAMIKA", "FOKUS", "MIZAN", "NIZOM", "ALGORITM", "ENERGIYA", "RITM", "MASOFA", "DAVR", "ILLUZIYA", "MAKON", "SIG'IM"];
+        let targetString = "";
+        let examLocked = false;
+
+        if (examCount >= DAILY_EXAM_LIMIT) lockExamSystem();
+
+        function lockExamSystem() {
+            examLocked = true;
+            document.getElementById('exam-title').innerText = "Tizim Qulflangan";
+            document.getElementById('exam-title').style.color = "var(--error-color)";
+            document.getElementById('exam-desc').innerHTML = "Bugungi kognitiv imtihon limiti tugadi.<br>Charchagan neyronlar bilan obyektiv natija qayd etib bo'lmaydi.";
+            document.getElementById('exam-start-btn').style.display = 'none';
+        }
+
+        function startExam() {
+            if (examLocked || examCount >= DAILY_EXAM_LIMIT) return;
+
+            document.getElementById('exam-start-btn').style.display = 'none';
+            document.getElementById('exam-desc').style.display = 'none';
+            examLimitStatus.style.display = 'none';
+            
+            let shuffled = [...wordsDB].sort(() => 0.5 - Math.random());
+            targetString = shuffled.slice(0, 4).join(" ").toUpperCase();
+
+            const display = document.getElementById('word-display');
+            let count = 3;
+            display.innerHTML = `<span style="font-size: 48px; color: var(--primary-color);">${count}</span>`;
+            
+            let timer = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    display.innerHTML = `<span style="font-size: 48px; color: var(--primary-color);">${count}</span>`;
+                } else {
+                    clearInterval(timer);
+                    showWords();
+                }
+            }, 1000);
+        }
+
+        function showWords() {
+            const display = document.getElementById('word-display');
+            display.innerText = targetString;
+            
+            setTimeout(() => {
+                display.innerText = "";
+                document.getElementById('exam-title').innerText = "Tiklash bosqichi";
+                document.getElementById('input-container').style.display = 'flex';
+                document.getElementById('user-input').focus();
+            }, 2000);
+        }
+
+        function levenshteinDistance(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+            for (let i = 0; i <= a.length; i += 1) matrix[0][i] = i;
+            for (let j = 0; j <= b.length; j += 1) matrix[j][0] = j;
+            for (let j = 1; j <= b.length; j += 1) {
+                for (let i = 1; i <= a.length; i += 1) {
+                    const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+                    matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + indicator);
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        function checkResult() {
+            if (examLocked) return;
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true; submitBtn.innerText = "Tahlil qilinmoqda...";
+
+            let userInput = document.getElementById('user-input').value.trim().toUpperCase().replace(/\s+/g, ' ');
+            const distance = levenshteinDistance(targetString, userInput);
+            const maxLength = Math.max(targetString.length, userInput.length);
+            
+            let accuracy = 0;
+            if (maxLength > 0) accuracy = ((1 - (distance / maxLength)) * 100).toFixed(1);
+
+            examCount++;
+            localStorage.setItem('solar_exam_count', examCount);
+
+            document.getElementById('input-container').style.display = 'none';
+            const display = document.getElementById('word-display');
+            
+            const resultColor = accuracy >= 75 ? 'var(--primary-color)' : 'var(--error-color)';
+            display.innerHTML = `<span class="result-score" style="color: ${resultColor};">${accuracy}%</span>`;
+            document.getElementById('exam-title').innerText = "Kognitiv Aniqlik";
+
+            setTimeout(() => {
+                tg.sendData(JSON.stringify({ action: "exam_finished", accuracy: parseFloat(accuracy) }));
+            }, 2500);
+        }
+
+        // Boshlang'ich yuklash
         initLevelParameters();
     </script>
 </body>
