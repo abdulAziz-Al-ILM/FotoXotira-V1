@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maxsus Imtihon | ILM SolarArk</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #fcfdfc;
+            --text-color: #1e272e;
+            --primary-color: #05c46b;
+            --error-color: #ff3f34;
+            --secondary-text: #808e9b;
+        }
+        
+        body {
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between;
+            height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            text-align: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #tg-block {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 999; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center; padding: 30px; box-sizing: border-box;
+        }
+        #tg-block h2 { color: var(--text-color); margin-bottom: 15px; font-size: 22px; }
+        #tg-block p { color: var(--secondary-text); margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
+        #tg-block a {
+            background-color: var(--primary-color); color: white; padding: 14px 32px;
+            text-decoration: none; border-radius: 30px; font-weight: 700; font-size: 16px;
+            box-shadow: 0 8px 20px rgba(5, 196, 107, 0.3); transition: all 0.2s;
+        }
+
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        h1 { 
+            font-size: 24px; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-weight: 800;
+        }
+        
+        .limit-text { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--secondary-text); 
+            margin-bottom: 25px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            background: rgba(128, 142, 155, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        #desc { 
+            color: var(--secondary-text); 
+            font-size: 14px; 
+            margin-bottom: 30px; 
+            line-height: 1.6; 
+            font-weight: 500;
+        }
+        
+        #word-display {
+            font-size: 32px; 
+            font-weight: 800; 
+            letter-spacing: 2px;
+            min-height: 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        #input-container { 
+            display: none; 
+            width: 100%; 
+            flex-direction: column; 
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input[type="text"] {
+            width: 100%; 
+            padding: 16px; 
+            font-size: 18px; 
+            border: 2px solid #dfe4ea;
+            border-radius: 16px; 
+            margin-bottom: 20px; 
+            box-sizing: border-box;
+            text-align: center; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            background-color: #ffffff;
+            color: var(--text-color);
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus { 
+            outline: none; 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 4px rgba(5, 196, 107, 0.1);
+        }
+        
+        button {
+            background-color: var(--text-color); 
+            color: #ffffff; 
+            border: none;
+            padding: 16px 32px; 
+            font-size: 16px; 
+            border-radius: 30px; 
+            cursor: pointer;
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+            transition: all 0.2s; 
+            box-shadow: 0 8px 20px rgba(30, 39, 46, 0.15);
+        }
+        
+        button:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 4px 10px rgba(30, 39, 46, 0.15);
+        }
+        
+        #footer {
+            margin-top: auto;
+            text-align: center;
+            padding-bottom: 10px;
+        }
+        
+        .signature { 
+            font-size: 11px; 
+            color: #a4b0be; 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            letter-spacing: 1.5px; 
+        }
+
+        .result-score {
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tg-block">
+        <h2>Tizimga kirish rad etildi</h2>
+        <p>Imtihon poligoni faqat yopiq Telegram muhitida ishlaydi.</p>
+        <a href="https://t.me/FotoXotiraBot">@FotoXotiraBot</a>
+    </div>
+
+    <div id="main-container">
+        <h1 id="title">Kognitiv Imtihon</h1>
+        <div class="limit-text" id="limit-status"></div>
+        <p id="desc">Ekranda 4 ta mantiqsiz so'z roppa-rosa <b>2 soniya</b> paydo bo'ladi. Ularni fotografik xotiraga muhrlang. Yordam bo'lmaydi.</p>
+
+        <div id="word-display"></div>
+
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="SO'ZLARNI KIRITING" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+            <button id="submit-btn" onclick="checkResult()">Tahlil qilish</button>
+        </div>
+
+        <button id="start-btn" onclick="startExam()">Zarbani qabul qilish</button>
+    </div>
+
+    <div id="footer">
+        <div class="signature">ILM Mizan me'morligida bunyod etildi</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+            document.getElementById('tg-block').style.display = 'flex';
+            document.getElementById('main-container').style.display = 'none';
+            document.getElementById('footer').style.display = 'none';
+        }
+
+        const DAILY_EXAM_LIMIT = 5;
+        let todayDate = new Date().toDateString();
+        let savedDate = localStorage.getItem('solar_exam_date');
+        let examCount = parseInt(localStorage.getItem('solar_exam_count')) || 0;
+
+        if (savedDate !== todayDate) {
+            examCount = 0;
+            localStorage.setItem('solar_exam_date', todayDate);
+            localStorage.setItem('solar_exam_count', examCount);
+        }
+
+        const limitStatus = document.getElementById('limit-status');
+        limitStatus.innerText = `Urinishlar: ${examCount} / ${DAILY_EXAM_LIMIT}`;
+
+        // Abstrakt, ilmiy va psixologik yuklamaga ega so'zlar bazasi (Ebbinghaus effekti uchun)
+        const wordsDB = [
+            "NEYRON", "KVANT", "IDROK", "SAMO", "ZAMIN", "UFQ", "MANTIQ", "ZANJIR", 
+            "QUDRAT", "IRODA", "SINTEZ", "MODDA", "VEKTOR", "OQIM", "ZARBA", "CHEGARA", 
+            "SFERA", "KOGNITIV", "DINAMIKA", "FOKUS", "MIZAN", "NIZOM", "ALGORITM", 
+            "ENERGIYA", "RITM", "MASOFA", "DAVR", "ILLUZIYA", "MAKON", "SIG'IM"
+        ];
+        
+        let targetWords = [];
+        let targetString = "";
+        let examLocked = false;
+
+        if (examCount >= DAILY_EXAM_LIMIT) {
+            lockSystem();
+        }
+
+        function lockSystem() {
+            examLocked = true;
+            document.getElementById('title').innerText = "Tizim Qulflangan";
+            document.getElementById('title').style.color = "var(--error-color)";
+            document.getElementById('desc').innerHTML = "Bugungi kognitiv imtihon limiti tugadi.<br>Charchagan neyronlar bilan obyektiv natija qayd etib bo'lmaydi.";
+            document.getElementById('start-btn').style.display = 'none';
+            limitStatus.style.color = "var(--error-color)";
+            limitStatus.style.background = "rgba(255, 63, 52, 0.1)";
+        }
+
+        function startExam() {
+            if (examLocked || examCount >= DAILY_EXAM_LIMIT) return;
+
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('desc').style.display = 'none';
+            limitStatus.style.display = 'none';
+            
+            // Tasodifiy 4 ta so'zni aralashtirib olish
+            let shuffled = [...wordsDB].sort(() => 0.5 - Math.random());
+            targetWords = shuffled.slice(0, 4);
+            targetString = targetWords.join(" ").toUpperCase();
+
+            const display = document.getElementById('word-display');
+            
+            // 3 soniyali tayyorgarlik (fokusni jamlash uchun)
+            let count = 3;
+            display.innerHTML = `<span style="font-size: 48px; color: var(--primary-color);">${count}</span>`;
+            
+            let timer = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    display.innerHTML = `<span style="font-size: 48px; color: var(--primary-color);">${count}</span>`;
+                } else {
+                    clearInterval(timer);
+                    showWords();
+                }
+            }, 1000);
+        }
+
+        function showWords() {
+            const display = document.getElementById('word-display');
+            display.innerText = targetString;
+            
+            // Aynan 2000 millisoniya (2 soniya) dan so'ng so'zlar o'chadi
+            setTimeout(() => {
+                display.innerText = "";
+                document.getElementById('title').innerText = "Tiklash bosqichi";
+                document.getElementById('input-container').style.display = 'flex';
+                document.getElementById('user-input').focus();
+            }, 2000);
+        }
+
+        // Levenshtein algoritmi: Ikki matn orasidagi farqni harfbay tekshiradi
+        function levenshteinDistance(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+            for (let i = 0; i <= a.length; i += 1) matrix[0][i] = i;
+            for (let j = 0; j <= b.length; j += 1) matrix[j][0] = j;
+            for (let j = 1; j <= b.length; j += 1) {
+                for (let i = 1; i <= a.length; i += 1) {
+                    const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+                    matrix[j][i] = Math.min(
+                        matrix[j][i - 1] + 1, // o'chirish
+                        matrix[j - 1][i] + 1, // kiritish
+                        matrix[j - 1][i - 1] + indicator // almashtirish
+                    );
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        function checkResult() {
+            if (examLocked) return;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Tahlil qilinmoqda...";
+
+            let userInput = document.getElementById('user-input').value.trim().toUpperCase();
+            
+            // Odam 2 ta so'z orasiga adashib 2-3 ta probel tashlab yuborsa, qat'iy xato deb topmaslik uchun tozalaymiz
+            userInput = userInput.replace(/\s+/g, ' ');
+
+            const distance = levenshteinDistance(targetString, userInput);
+            const maxLength = Math.max(targetString.length, userInput.length);
+            
+            let accuracy = 0;
+            if (maxLength > 0) {
+                accuracy = ((1 - (distance / maxLength)) * 100).toFixed(1);
+            }
+
+            // Limitni yozamiz
+            examCount++;
+            localStorage.setItem('solar_exam_count', examCount);
+
+            document.getElementById('input-container').style.display = 'none';
+            const display = document.getElementById('word-display');
+            
+            // Natijani ko'rsatish
+            const resultColor = accuracy >= 75 ? 'var(--primary-color)' : 'var(--error-color)';
+            display.innerHTML = `<span class="result-score" style="color: ${resultColor};">${accuracy}%</span>`;
+            document.getElementById('title').innerText = "Kognitiv Aniqlik";
+
+            // 2.5 soniyadan so'ng natijani orqa fondagi bazaga (botga) jo'natamiz
+            setTimeout(() => {
+                tg.sendData(JSON.stringify({
+                    action: "exam_finished",
+                    accuracy: parseFloat(accuracy)
+                }));
+            }, 2500);
+        }
+
+        // Enter tugmasini bosganda ham javobni qabul qilish
+        document.getElementById('user-input').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                checkResult();
+            }
+        });
+    </script>
+</body>
+</html>
