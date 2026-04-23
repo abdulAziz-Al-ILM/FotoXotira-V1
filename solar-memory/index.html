@@ -56,7 +56,6 @@
 
         #exam-desc { color: var(--secondary-text); font-size: 13px; margin-bottom: 20px; line-height: 1.5; font-weight: 500; text-align: center; }
         
-        /* Imtihon so'zlari 20 ta bo'lgani uchun kichraytirildi */
         #word-display { 
             font-size: 18px; font-weight: 800; letter-spacing: 1px; line-height: 1.6;
             min-height: 120px; display: flex; align-items: center; justify-content: center; 
@@ -65,7 +64,6 @@
         
         #input-container { display: none; width: 100%; flex-direction: column; }
         
-        /* 20 ta so'z yozish uchun textarea ga o'zgartirildi */
         textarea { 
             width: 100%; padding: 16px; font-size: 16px; border: 2px solid #dfe4ea; 
             border-radius: 16px; margin-bottom: 20px; box-sizing: border-box; 
@@ -164,10 +162,10 @@
             }
         }
 
-        // === 1. MASHQ LOGIKASI (O'zgarishsiz) ===
+        // === 1. MASHQ LOGIKASI ===
         const DAILY_LIMIT = 90;
         const SESSION_LIMIT = 30;
-        const COOLDOWN_MS = 60 * 60 * 1000; 
+        const COOLDOWN_MS = 90 * 60 * 1000; // 1.5 soat (90 daqiqa)
 
         let currentLevel = parseInt(localStorage.getItem('solar_memory_level')) || 1;
         let todayDate = new Date().toDateString();
@@ -204,7 +202,7 @@
 
                 if (timePassed < COOLDOWN_MS) {
                     let timeLeft = Math.ceil((COOLDOWN_MS - timePassed) / 60000); 
-                    showOverlay("Neyronlar Qizib Ketdi", `Sessiya yakunlandi. Miya axborotni sintez qilishi uchun tanaffus zarur.\n\nTizim ochilishiga: ${timeLeft} daqiqa qoldi.`, "Kutish", () => {
+                    showOverlay("Neyronlar Qizib Ketdi", `Sessiya yakunlandi. Miya axborotni sintez qilishi uchun 1.5 soatlik qat'iy tanaffus zarur.\n\nTizim ochilishiga: ${timeLeft} daqiqa qoldi.`, "Kutish", () => {
                         document.getElementById('overlay').style.display = 'none';
                     });
                     return true;
@@ -323,7 +321,7 @@
             initLevelParameters();
         }
 
-        // === 2. IMTIHON LOGIKASI (20 ta so'z, Tanaffus, Qayta urinish) ===
+        // === 2. IMTIHON LOGIKASI ===
         const DAILY_EXAM_LIMIT = 5;
         const EXAM_COOLDOWN_MS = 15 * 60 * 1000; // 15 daqiqa
         
@@ -341,10 +339,9 @@
         const examLimitStatus = document.getElementById('exam-limit-status');
         examLimitStatus.innerText = `Urinishlar: ${examCount} / ${DAILY_EXAM_LIMIT}`;
 
-        // 50 tadan ortiq so'zlar bazasi (takrorlanmaslik ehtimolini oshirish uchun)
         const wordsDB = [
-            "NEYRON", "KVANT", "IDROK", "SAMO", "ZAMIN", "UFQ", "MANTIQ", "ZANJIR", "QUDRAT", "IRODA", "CHUCHVARA", "FIZIKA", "BIOLOGIYA",
-            "SINTEZ", "MODDA", "VEKTOR", "OQIM", "ZARBA", "CHEGARA", "SFERA", "KOGNITIV", "DINAMIKA", "FOKUS", "KOMPYUTER",
+            "NEYRON", "KVANT", "IDROK", "SAMO", "ZAMIN", "UFQ", "MANTIQ", "ZANJIR", "QUDRAT", "IRODA", 
+            "SINTEZ", "MODDA", "VEKTOR", "OQIM", "ZARBA", "CHEGARA", "SFERA", "KOGNITIV", "DINAMIKA", "FOKUS", 
             "MIZAN", "NIZOM", "ALGORITM", "ENERGIYA", "RITM", "MASOFA", "DAVR", "ILLUZIYA", "MAKON", "SIG'IM",
             "ABSTRAKT", "FUNKSIYA", "GRAFIKA", "POLIGON", "KOD", "IMPULS", "REFLEKS", "GENETIKA", "SIVILIZATSIYA",
             "EVOLYUTSIYA", "ENERGETIKA", "MEXANIZM", "GIPOTEZA", "FAKTOR", "INDUKSIYA", "DEDUKSIYA", "REAKSIYA",
@@ -387,7 +384,6 @@
             document.getElementById('exam-desc').style.display = 'none';
             examLimitStatus.style.display = 'none';
             
-            // 20 ta so'z tanlab olinadi
             let shuffled = [...wordsDB].sort(() => 0.5 - Math.random());
             targetString = shuffled.slice(0, 20).join(" ").toUpperCase();
 
@@ -410,7 +406,6 @@
             const display = document.getElementById('word-display');
             display.innerText = targetString;
             
-            // 20 ta so'z uchun aynan 4 soniya (4000ms) beriladi
             setTimeout(() => {
                 display.innerText = "";
                 document.getElementById('exam-title').innerText = "Tiklash bosqichi";
@@ -446,7 +441,6 @@
             let accuracy = 0;
             if (maxLength > 0) accuracy = ((1 - (distance / maxLength)) * 100).toFixed(1);
 
-            // Limit va vaqtni yangilash
             examCount++;
             lastExamTime = Date.now();
             localStorage.setItem('solar_exam_count', examCount);
@@ -459,7 +453,6 @@
             display.innerHTML = `<span class="result-score" style="color: ${resultColor};">${accuracy}%</span>`;
             document.getElementById('exam-title').innerText = "Kognitiv Aniqlik";
 
-            // Botga jo'natish (Agar menu buttondan kirsangiz jim yopilmasligi uchun, timeout bilan qayta urinish tugmasi chiqadi)
             tg.sendData(JSON.stringify({ action: "exam_finished", accuracy: parseFloat(accuracy) }));
             
             setTimeout(() => {
