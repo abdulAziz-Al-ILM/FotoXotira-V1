@@ -24,14 +24,6 @@
             user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        #tg-block {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); z-index: 999; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center; padding: 30px; box-sizing: border-box;
-        }
-        #tg-block h2 { margin-bottom: 15px; font-size: 22px; }
-        #tg-block p { color: var(--secondary-text); margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
-
         .tabs {
             display: flex; width: 100%; max-width: 400px; margin-top: 15px;
             background: var(--cell-bg); border-radius: 20px; padding: 5px; box-sizing: border-box;
@@ -91,11 +83,6 @@
 </head>
 <body>
 
-    <div id="tg-block">
-        <h2>Tizimga kirish rad etildi</h2>
-        <p>Kognitiv Tizim faqat yopiq Telegram muhitida ishlaydi.</p>
-    </div>
-
     <div class="tabs" id="app-tabs">
         <div class="tab active" onclick="switchTab('mashq')">Bazaviy Mashq</div>
         <div class="tab" onclick="switchTab('imtihon')">Maxsus Imtihon</div>
@@ -140,14 +127,6 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-
-        if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-            document.getElementById('tg-block').style.display = 'flex';
-            document.getElementById('app-tabs').style.display = 'none';
-            document.getElementById('mashq-section').style.display = 'none';
-            document.getElementById('imtihon-section').style.display = 'none';
-            document.getElementById('footer').style.display = 'none';
-        }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
